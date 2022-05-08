@@ -27,20 +27,22 @@ ITEM_PIPELINES = {
     'movie_spider.pipelines.MovieSpiderPipeline': 300,
 }
 
-# # redis分布式爬虫主要做下面几点，需要安装pip install scrapy-redis
-# # 一个去重的类，用来将url去重
-# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
-# # 调度器
-# SCHEDULER = "scrapy_redis.scheduler.Scheduler"
-# # 是否持久化
-# SCHEDULER_PERSIST = True
-# # redis地址
-# REDIS_URL = "redis://127.0.0.1:6379"
+
+# redis分布式爬虫主要做下面几点，需要安装pip install scrapy-redis
+# 一个去重的类，用来将url去重
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+# 调度器
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+# 是否持久化
+SCHEDULER_PERSIST = True
+# redis地址
+REDIS_URL = "redis://127.0.0.1:6379/2"
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 # 节流阀，自动调整下载延迟
-AUTOTHROTTLE_ENABLED = True
+#AUTOTHROTTLE_ENABLED = True
 
 # 初始下载延迟，默认5
 AUTOTHROTTLE_START_DELAY = 5

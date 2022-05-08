@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 import re
+
 
 class Dytt8Spider(CrawlSpider):
     name = 'dytt8'
@@ -20,34 +20,54 @@ class Dytt8Spider(CrawlSpider):
         """在电影详情页提取电影信息"""
         item = dict()
 
-        # 电影标题
-        item["title"] = response.xpath('//div[@class="title_all"]/h1/font/text()').extract_first()
+        # 电影简介
+        item['title'] = response.xpath('//div[@class="title_all"]/h1/font/text()').extract_first()
 
         # 电影名
         name = re.search(r'《(.*?)》', item.get('title'))
-        item['name'] = name.group(1)
+        if name:
+            item['name'] = name.group(1)
+        else:
+            item['name'] = 'null'
 
-        # 电影发布时间
+        # 电影天堂发布此电影时间
         time = response.xpath('//div[@class="co_content8"]/ul/text()').get()
-        item['time'] = time.strip()
+        if re.search(r'发布时间：(\d+-\d+-\d+)', time):
+            time = re.search(r'发布时间：(\d+-\d+-\d+)', time).group(1)
+        else:
+            time = '1000-01-01'
+        item['time'] = time
 
         # 电影封面图url
-        item['image'] = response.xpath(' //div[@id ="Zoom"]//img[@border="0"]/@src').get()
+        image = response.xpath('//div[@id ="Zoom"]//img[@border="0"]/@src').get()
+        item['image'] = image if image else ''
 
-        # # 下面是使用正则匹配
-        # response_str = response.text
-        # # 产地
-        # place = re.findall(r'<br />◎产　　地　(.*?)<br />', response_str)
-        # item["产地"] = place[0] if len(place) > 0 else None
-        # # 年代
-        # time = re.findall(r'<br />◎年　　代　(.*?)<br />', response_str)
-        # item["年代"] = time[0] if len(time) > 0 else None
-        # # 简介
-        # brief = re.findall(r'<br />◎简　　介 <br /><br />　　(.*?)<br />', response_str)
-        # item["简介"] = brief[0] if len(brief) > 0 else None
+        # 电影详情页
+        detail = response.xpath('//div[@id="Zoom"]//td').get()
+        item['detail'] = detail if detail else 'null'
 
         # 原网站url
         item["url"] = response.url
+
+        # 下面是使用正则匹配
+        response_str = response.text
+
+        # 豆瓣评分
+        douban_score = re.findall(r'◎豆瓣评分　(.*?)/10', response_str)
+        try:
+            douban_score = float(douban_score[0])
+        except:
+            douban_score = -1
+        item['douban_score'] = douban_score
+
+        # IMDb评分
+        IMDb_score = re.findall(r'◎IMDb评分　(\d.\d)?/10', response_str)
+        try:
+            IMDb_score = float(IMDb_score[0])
+        except:
+            IMDb_score = -1
+        item['IMDb_score'] = IMDb_score
+
         yield item
 
 
